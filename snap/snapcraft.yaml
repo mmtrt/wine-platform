@@ -1,0 +1,384 @@
+name: wine-platform
+version: '3.0.3-3.19.0'
+summary: wine platform snap it provides WINE for snaps
+description: |
+ This snap creates a WINE base via content sharing to be used by other snaps that are using WINE.
+
+grade: stable
+confinement: strict
+architectures:
+  - build-on: amd64
+    run-on: [amd64, i386]
+
+slots:
+  wine-base-stable:
+    content: wine-base-stable
+    interface: content
+    source:
+      read:
+      - $SNAP/bin
+      - $SNAP/etc
+      - $SNAP/lib
+      - $SNAP/usr
+      - $SNAP/opt/wine-stable
+
+  wine-base-devel:
+    content: wine-base-devel
+    interface: content
+    source:
+      read:
+      - $SNAP/bin
+      - $SNAP/etc
+      - $SNAP/lib
+      - $SNAP/usr
+      - $SNAP/opt/wine-devel
+
+  wine-base-staging:
+    content: wine-base-staging
+    interface: content
+    source:
+      read:
+      - $SNAP/bin
+      - $SNAP/etc
+      - $SNAP/lib
+      - $SNAP/usr
+      - $SNAP/opt/wine-staging
+
+parts:
+  enable-i386:
+    plugin: nil
+    build-attributes:
+      - no-system-libraries
+    build-packages:
+      # This snap is build on amd64 only
+      - on amd64:
+        - apt
+        - dpkg
+      - else fail
+    override-build: |
+      snapcraftctl build
+      dpkg --add-architecture i386
+      apt update
+
+  wine:
+    plugin: nil
+    build-attributes:
+      - no-system-libraries
+    build-packages:
+      - dpkg
+      - wget
+    override-build: |
+      snapcraftctl build
+
+      WINE_VER="3.0.3"
+      WINE_VER_DEV="3.19.0"
+
+      # wget and dpkg extract the wine debs
+      DEB_URLS="https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable-i386_${WINE_VER}~xenial_i386.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable_${WINE_VER}~xenial_i386.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable-amd64_${WINE_VER}~xenial_amd64.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable_${WINE_VER}~xenial_amd64.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel-i386_${WINE_VER_DEV}~xenial_i386.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel_${WINE_VER_DEV}~xenial_i386.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel-amd64_${WINE_VER_DEV}~xenial_amd64.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel_${WINE_VER_DEV}~xenial_amd64.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging-i386_${WINE_VER_DEV}~xenial_i386.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging_${WINE_VER_DEV}~xenial_i386.deb
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging-amd64_${WINE_VER_DEV}~xenial_amd64.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging_${WINE_VER_DEV}~xenial_amd64.deb"
+
+      for DEB_URL in ${DEB_URLS}; do
+        DEB=$(basename "${DEB_URL}")
+        echo "Downloading ${DEB_URL}..."
+        wget --quiet "${DEB_URL}" -O "${SNAPCRAFT_PART_INSTALL}/${DEB}"
+        echo "Unpacking ${DEB}..."
+        dpkg -x "${SNAPCRAFT_PART_INSTALL}/${DEB}" ${SNAPCRAFT_PART_INSTALL}
+        rm -f "${SNAPCRAFT_PART_INSTALL}/${DEB}"
+      done
+
+      # Cleanup
+      for REL in wine-stable wine-devel wine-staging; do
+      rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/share/applications
+      rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/share/man
+      done
+      rm -rf ${SNAPCRAFT_PART_INSTALL}/usr/share/doc
+      rm -rf ${SNAPCRAFT_PART_INSTALL}/usr/share/lintian
+    after:
+      - enable-i386
+
+  wine-runtime:
+    plugin: nil
+    build-attributes:
+      - no-system-libraries
+    stage-packages:
+      - gcc-5-base:i386
+      - gcc-6-base:i386
+      - glib-networking:i386
+      - gstreamer1.0-plugins-base:i386
+      - i965-va-driver:i386
+      - locales-all:i386
+      - libasn1-8-heimdal:i386
+      - libasound2:i386
+      - libasound2-plugins:i386
+      - libasyncns0:i386
+      - libatk-bridge2.0-0:i386
+      - libatk1.0-0:i386
+      - libatspi2.0-0:i386
+      - libavahi-client3:i386
+      - libavahi-common-data:i386
+      - libavahi-common3:i386
+      - libboost-filesystem1.58.0:i386
+      - libboost-system1.58.0:i386
+      - libbsd0:i386
+      - libc6:i386
+      - libcairo-gobject2:i386
+      - libcairo2:i386
+      - libcap2:i386
+      - libcapi20-3:i386
+      - libcapnp-0.5.3:i386
+      - libcdparanoia0:i386
+      - libcolord2:i386
+      - libcomerr2:i386
+      - libcups2:i386
+      - libdatrie1:i386
+      - libdb5.3:i386
+      - libdbus-1-3:i386
+      - libdrm-amdgpu1:i386
+      - libdrm-intel1:i386
+      - libdrm-nouveau2:i386
+      - libdrm-radeon1:i386
+      - libdrm2:i386
+      - libedit2:i386
+      - libegl1-mesa:i386
+      - libelf1:i386
+      - libepoxy0:i386
+      - libexif12:i386
+      - libexpat1:i386
+      - libffi6:i386
+      - libflac8:i386
+      - libfontconfig1:i386
+      - libfreetype6:i386
+      - libgbm1:i386
+      - libgcc1:i386
+      - libgcrypt20:i386
+      - libgd3:i386
+      - libgdk-pixbuf2.0-0:i386
+      - libgl1-mesa-dri:i386
+      - libgl1-mesa-glx:i386
+      - libglapi-mesa:i386
+      - libglib2.0-0:i386
+      - libglu1-mesa:i386
+      - libgmp10:i386
+      - libgnutls30:i386
+      - libgpg-error0:i386
+      - libgphoto2-6:i386
+      - libgphoto2-port12:i386
+      - libgpm2:i386
+      - libgraphite2-3:i386
+      - libgsm1:i386
+      - libgssapi-krb5-2:i386
+      - libgssapi3-heimdal:i386
+      - libgstreamer-plugins-base1.0-0:i386
+      - libgstreamer1.0-0:i386
+      - libgtk-3-0:i386
+      - libharfbuzz0b:i386
+      - libhcrypto4-heimdal:i386
+      - libheimbase1-heimdal:i386
+      - libheimntlm0-heimdal:i386
+      - libhogweed4:i386
+      - libhx509-5-heimdal:i386
+      - libicu55:i386
+      - libidn11:i386
+      - libieee1284-3:i386
+      - libjack-jackd2-0:i386
+      - libjbig0:i386
+      - libjpeg-turbo8:i386
+      - libjpeg8:i386
+      - libjson-c2:i386
+      - libjson-glib-1.0-0:i386
+      - libk5crypto3:i386
+      - libkeyutils1:i386
+      - libkrb5-26-heimdal:i386
+      - libkrb5-3:i386
+      - libkrb5support0:i386
+      - liblcms2-2:i386
+      - libldap-2.4-2:i386
+      - libllvm6.0:i386
+      - libltdl7:i386
+      - liblzma5:i386
+      - libmirclient9:i386
+      - libmircommon7:i386
+      - libmircore1:i386
+      - libmirprotobuf3:i386
+      - libmpg123-0:i386
+      - libncurses5:i386
+      - libnettle6:i386
+      - libodbc1:i386
+      - libogg0:i386
+      - libopenal1:i386
+      - libopus0:i386
+      - liborc-0.4-0:i386
+      - libosmesa6:i386
+      - libp11-kit0:i386
+      - libpango-1.0-0:i386
+      - libpangocairo-1.0-0:i386
+      - libpangoft2-1.0-0:i386
+      - libpcap0.8:i386
+      - libpciaccess0:i386
+      - libpcre3:i386
+      - libpixman-1-0:i386
+      - libpng12-0:i386
+      - libprotobuf-lite9v5:i386
+      - libproxy1v5:i386
+      - libpulse0:i386
+      - librest-0.7-0:i386
+      - libroken18-heimdal:i386
+      - libsamplerate0:i386
+      - libsane:i386
+      - libsasl2-2:i386
+      - libsasl2-modules:i386
+      - libsasl2-modules-db:i386
+      - libsdl2-2.0-0:i386
+      - libselinux1:i386
+      - libsensors4:i386
+      - libsndfile1:i386
+      - libsndio6.1:i386
+      - libsoup-gnome2.4-1:i386
+      - libsoup2.4-1:i386
+      - libspeexdsp1:i386
+      - libsqlite3-0:i386
+      - libssl1.0.0:i386
+      - libstdc++6:i386
+      - libsystemd0:i386
+      - libtasn1-6:i386
+      - libthai0:i386
+      - libtheora0:i386
+      - libtiff5:i386
+      - libtinfo5:i386
+      - libtxc-dxtn-s2tc0:i386
+      - libudev1:i386
+      - libusb-1.0-0:i386
+      - libv4l-0:i386
+      - libv4lconvert0:i386
+      - libva-drm1:i386
+      - libva-x11-1:i386
+      - libva1:i386
+      - libvisual-0.4-0:i386
+      - libvorbis0a:i386
+      - libvorbisenc2:i386
+      - libvpx3:i386
+      - libvulkan1:i386
+      - libwayland-client0:i386
+      - libwayland-cursor0:i386
+      - libwayland-egl1-mesa:i386
+      - libwayland-server0:i386
+      - libwind0-heimdal:i386
+      - libwrap0:i386
+      - libx11-6:i386
+      - libx11-xcb1:i386
+      - libxau6:i386
+      - libxcb-dri2-0:i386
+      - libxcb-dri3-0:i386
+      - libxcb-glx0:i386
+      - libxcb-present0:i386
+      - libxcb-render0:i386
+      - libxcb-shm0:i386
+      - libxcb-sync1:i386
+      - libxcb-xfixes0:i386
+      - libxcb1:i386
+      - libxcomposite1:i386
+      - libxcursor1:i386
+      - libxdamage1:i386
+      - libxdmcp6:i386
+      - libxext6:i386
+      - libxfixes3:i386
+      - libxi6:i386
+      - libxinerama1:i386
+      - libxkbcommon0:i386
+      - libxml2:i386
+      - libxpm4:i386
+      - libxrandr2:i386
+      - libxrender1:i386
+      - libxshmfence1:i386
+      - libxslt1.1:i386
+      - libxss1:i386
+      - libxxf86vm1:i386
+      - mesa-va-drivers:i386
+      - va-driver-all:i386
+      - zlib1g:i386
+      - libcanberra-gtk-module:i386
+      - winbind:i386
+      - samba-libs:i386
+    override-build: |
+      snapcraftctl build
+      rm -rf $SNAPCRAFT_PART_INSTALL/etc/init
+      rm -rf $SNAPCRAFT_PART_INSTALL/etc/init.d
+      rm -rf $SNAPCRAFT_PART_INSTALL/etc/logrotate.d
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/apps
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/applications
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/bug
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/doc
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/doc-base
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/debhelper
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/lintian
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/man
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/pixmaps
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/pkgconfig
+      rm $SNAPCRAFT_PART_INSTALL/usr/bin/update-mime-database.real
+    after:
+      - enable-i386
+
+  wine-platform-i386:
+    plugin: dump
+    build-attributes:
+      - no-system-libraries
+    source: snap/scripts
+    organize:
+      'winetricks': bin/
+      'zenity': bin/
+    stage-packages:
+      - cabextract         # winetricks
+      - libgdk-pixbuf2.0-0 # yad
+      - libgtk-3-0         # yad
+      - libnotify4         # yad
+      - libnotify-bin      # sommelier
+      - perl-base          # winetricks
+      - shared-mime-info
+      - unzip              # winetricks
+      - wget               # winetricks
+      - x11-xserver-utils  # sommelier
+      - yad                # winetricks
+    override-build: |
+      snapcraftctl build
+      wget --quiet "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" -O $SNAPCRAFT_PART_INSTALL/winetricks
+      chmod +x $SNAPCRAFT_PART_INSTALL/winetricks
+      rm -rf $SNAPCRAFT_PART_INSTALL/etc/init
+      rm -rf $SNAPCRAFT_PART_INSTALL/etc/init.d
+      rm -rf $SNAPCRAFT_PART_INSTALL/etc/logrotate.d
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/bin/fc-*
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/bin/gtk-*
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/dconf/dconf-service
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/glib-networking/glib-pacrunner
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/GConf
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/aclocal
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/apport
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/apps
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/bash-completion
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/bug
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/debhelper
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/doc
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/doc-base
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/icons/Adwaita
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/icons/Humanity*
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/icons/LoginIcons
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/icons/ubuntu-mono*
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/info
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/kde4
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/lintian
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/menu
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/man
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/perl5
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/pixmaps
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/pkgconfig
+    after:
+      - enable-i386
