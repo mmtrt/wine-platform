@@ -527,7 +527,7 @@ parts:
     after:
       - enable-i386
 
-  wine-platform-i386:
+  wine-platform:
     plugin: dump
     build-attributes:
       - no-system-libraries
