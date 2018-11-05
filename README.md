@@ -69,7 +69,7 @@ _________________________________________________________________
 
 **Check out wrapper scripts that are using this snap env**
 
-[notepad-plus-plus](https://raw.githubusercontent.com/mmtrt/notepad-plus-plus/master/scripts/notepad-plus-plus) - [cncra](https://raw.githubusercontent.com/mmtrt/cncra/master/snap/scripts/sommelier)
+[notepad-plus-plus](https://raw.githubusercontent.com/mmtrt/notepad-plus-plus/master/src/notepad-plus-plus) - [cncra](https://raw.githubusercontent.com/mmtrt/cncra/master/snap/scripts/sommelier)
 
 **Also check `snapcraft.yamls` for further refrences**
 
