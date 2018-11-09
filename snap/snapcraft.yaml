@@ -87,14 +87,14 @@ parts:
 
       ## wine loaders - this one is the native system architecture
       DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable-${ARCH}_${WINE_VER}~xenial_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel-${ARCH}_${WINE_VER}~xenial_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging-${ARCH}_${WINE_VER}~xenial_${ARCH}.deb"
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel-${ARCH}_${WINE_VER_DEV}~xenial_${ARCH}.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging-${ARCH}_${WINE_VER_DEV}~xenial_${ARCH}.deb"
 
       if [ "$ARCH" = "amd64" ]; then
         ## on amd64 builds we need to also bundle the i386 wine loaders
         DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable-i386_${WINE_VER}~xenial_i386.deb \
-        https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel-i386_${WINE_VER}~xenial_i386.deb \
-        https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging-i386_${WINE_VER}~xenial_i386.deb"
+        https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel-i386_${WINE_VER_DEV}~xenial_i386.deb \
+        https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging-i386_${WINE_VER_DEV}~xenial_i386.deb"
       fi
 
       for DEB_URL in ${DEB_URLS}; do
