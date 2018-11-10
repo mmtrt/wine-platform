@@ -72,12 +72,9 @@ parts:
 
       # wget and dpkg extract the wine debs
       ## supporting binaries which are arch-specific but the same filenames in both architectures so we only install the native architecture
-      DEB_URLS="https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable_${WINE_VER}~xenial_i386.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable_${WINE_VER}~xenial_amd64.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel_${WINE_VER_DEV}~xenial_i386.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel_${WINE_VER_DEV}~xenial_amd64.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging_${WINE_VER_DEV}~xenial_i386.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging_${WINE_VER_DEV}~xenial_amd64.deb"
+      DEB_URLS="https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable_${WINE_VER}~xenial_${ARCH}.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel_${WINE_VER_DEV}~xenial_${ARCH}.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging_${WINE_VER_DEV}~xenial_${ARCH}.deb"
 
       ## wine loaders - this one is the native system architecture
       DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable-${ARCH}_${WINE_VER}~xenial_${ARCH}.deb \
