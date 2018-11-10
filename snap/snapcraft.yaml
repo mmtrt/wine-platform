@@ -157,6 +157,8 @@ parts:
       - libxxf86vm1
       - winbind
       - samba-libs
+      - libmono-system-core4.0-cil
+      - mono-runtime
       - on amd64:
         - libasound2:i386
         #- libgphoto2-6:i386
