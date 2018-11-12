@@ -1,5 +1,6 @@
 name: wine-platform
-version: '3.0.3-3.19.0'
+version: latest
+version-script: cat $SNAPCRAFT_STAGE/version
 summary: wine platform snap it provides WINE for snaps
 description: |
  This snap creates a WINE base via content sharing to be used by other snaps that are using WINE.
@@ -69,6 +70,9 @@ parts:
       ARCH="$(dpkg --print-architecture)"
       WINE_VER="3.0.3"
       WINE_VER_DEV="3.20.0"
+
+      # set snap version
+      echo "$WINE_VER-$WINE_VER_DEV" > $SNAPCRAFT_STAGE/version
 
       # wget and dpkg extract the wine debs
       ## supporting binaries which are arch-specific but the same filenames in both architectures so we only install the native architecture
