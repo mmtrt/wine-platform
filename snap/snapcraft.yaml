@@ -51,7 +51,6 @@ parts:
     plugin: nil
     build-attributes:
       - no-system-libraries
-      - no-patchelf
     override-build: |
       snapcraftctl build
       if [ "$SNAPCRAFT_ARCH_TRIPLET" = "x86_64-linux-gnu" ]; then
@@ -63,7 +62,6 @@ parts:
     plugin: nil
     build-attributes:
       - no-system-libraries
-      - no-patchelf
     build-packages:
       - dpkg
       - wget
@@ -118,7 +116,6 @@ parts:
     plugin: nil
     build-attributes:
       - no-system-libraries
-      - no-patchelf
     stage-packages:
       - libasound2
       #- libgphoto2-6
@@ -233,7 +230,6 @@ parts:
     plugin: dump
     build-attributes:
       - no-system-libraries
-      - no-patchelf
     source: snap/scripts
     organize:
       'winetricks': bin/
