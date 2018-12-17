@@ -159,6 +159,7 @@ parts:
       - libxrender1
       - libxslt1.1
       - libxxf86vm1
+      - util-linux
       - winbind
       - samba-libs
       - on amd64:
