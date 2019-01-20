@@ -69,28 +69,28 @@ parts:
       snapcraftctl build
 
       ARCH="$(dpkg --print-architecture)"
-      WINE_VER="3.0.3"
-      WINE_VER_DEV="3.21.0"
+      WINE_VER="3.0.4"
+      WINE_VER_DEV="4.0~rc7"
 
       # set snap version
       echo "$WINE_VER-$WINE_VER_DEV" > $SNAPCRAFT_STAGE/version
 
       # wget and dpkg extract the wine debs
       ## supporting binaries which are arch-specific but the same filenames in both architectures so we only install the native architecture
-      DEB_URLS="https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable_${WINE_VER}~bionic_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel_${WINE_VER_DEV}~bionic_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging_${WINE_VER_DEV}~bionic_${ARCH}.deb"
+      DEB_URLS="https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-stable_${WINE_VER}~bionic_${ARCH}.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-devel_${WINE_VER_DEV}~bionic_${ARCH}.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-staging_${WINE_VER_DEV}~bionic_${ARCH}.deb"
 
       ## wine loaders - this one is the native system architecture
-      DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable-${ARCH}_${WINE_VER}~bionic_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel-${ARCH}_${WINE_VER_DEV}~bionic_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging-${ARCH}_${WINE_VER_DEV}~bionic_${ARCH}.deb"
+      DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-stable-${ARCH}_${WINE_VER}~bionic_${ARCH}.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-devel-${ARCH}_${WINE_VER_DEV}~bionic_${ARCH}.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-staging-${ARCH}_${WINE_VER_DEV}~bionic_${ARCH}.deb"
 
       if [ "$ARCH" = "amd64" ]; then
         ## on amd64 builds we need to also bundle the i386 wine loaders
-        DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-stable-i386_${WINE_VER}~bionic_i386.deb \
-        https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-devel-i386_${WINE_VER_DEV}~bionic_i386.deb \
-        https://dl.winehq.org/wine-builds/ubuntu/pool/main/wine-staging-i386_${WINE_VER_DEV}~bionic_i386.deb"
+        DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-stable-i386_${WINE_VER}~bionic_i386.deb \
+        https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-devel-i386_${WINE_VER_DEV}~bionic_i386.deb \
+        https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-staging-i386_${WINE_VER_DEV}~bionic_i386.deb"
       fi
 
       for DEB_URL in ${DEB_URLS}; do
@@ -160,6 +160,7 @@ parts:
       - libxrender1
       - libxslt1.1
       - libxxf86vm1
+      - util-linux
       - winbind
       - samba-libs
       - on amd64:
