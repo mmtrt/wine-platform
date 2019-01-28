@@ -225,6 +225,7 @@ parts:
       rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/pixmaps
       rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/pkgconfig
       rm $SNAPCRAFT_PART_INSTALL/usr/bin/update-mime-database.real
+      sed -i 's|/usr/lib/||' $SNAPCRAFT_PART_INSTALL/etc/mono/config
     after:
       - enable-i386
 
