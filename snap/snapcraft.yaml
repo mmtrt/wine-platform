@@ -252,8 +252,6 @@ parts:
       snapcraftctl build
       wget --quiet "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" -O $SNAPCRAFT_PART_INSTALL/winetricks
       chmod +x $SNAPCRAFT_PART_INSTALL/winetricks
-      wget http://security.ubuntu.com/ubuntu/pool/main/g/glibc/libc6_2.23-0ubuntu10_i386.deb && dpkg-deb -xv libc6_2.23-0ubuntu10_i386.deb .
-      cp -r -p ./lib $SNAPCRAFT_PART_INSTALL/ && cp -r -p ./usr $SNAPCRAFT_PART_INSTALL/ && cp -r -p ./etc $SNAPCRAFT_PART_INSTALL/
       touch $SNAPCRAFT_PART_INSTALL/wpfile
       rm -rf $SNAPCRAFT_PART_INSTALL/etc/init
       rm -rf $SNAPCRAFT_PART_INSTALL/etc/init.d
