@@ -69,7 +69,7 @@ parts:
 
       ARCH="$(dpkg --print-architecture)"
       WINE_VER="3.0.4"
-      WINE_VER_DEV="4.0"
+      WINE_VER_DEV="4.3"
 
       # set snap version
       echo "$WINE_VER-$WINE_VER_DEV" > $SNAPCRAFT_STAGE/version
@@ -78,18 +78,18 @@ parts:
       ## supporting binaries which are arch-specific but the same filenames in both architectures so we only install the native architecture
       DEB_URLS="https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-stable_${WINE_VER}~xenial_${ARCH}.deb \
       https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-devel_${WINE_VER_DEV}~xenial_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-staging_${WINE_VER_DEV}~xenial_${ARCH}.deb"
+      https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-staging_4.0~xenial_${ARCH}.deb"
 
       ## wine loaders - this one is the native system architecture
       DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-stable-${ARCH}_${WINE_VER}~xenial_${ARCH}.deb \
       https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-devel-${ARCH}_${WINE_VER_DEV}~xenial_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-staging-${ARCH}_${WINE_VER_DEV}~xenial_${ARCH}.deb"
+      https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-staging-${ARCH}_4.0~xenial_${ARCH}.deb"
 
       if [ "$ARCH" = "amd64" ]; then
         ## on amd64 builds we need to also bundle the i386 wine loaders
         DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-i386/wine-stable-i386_${WINE_VER}~xenial_i386.deb \
         https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-i386/wine-devel-i386_${WINE_VER_DEV}~xenial_i386.deb \
-        https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-i386/wine-staging-i386_${WINE_VER_DEV}~xenial_i386.deb"
+        https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-i386/wine-staging-i386_4.0~xenial_i386.deb"
       fi
 
       for DEB_URL in ${DEB_URLS}; do
