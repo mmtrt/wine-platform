@@ -49,8 +49,6 @@ slots:
 parts:
   enable-i386:
     plugin: nil
-    build-attributes:
-      - no-system-libraries
     override-build: |
       snapcraftctl build
       if [ "$SNAPCRAFT_ARCH_TRIPLET" = "x86_64-linux-gnu" ]; then
@@ -60,8 +58,6 @@ parts:
 
   wine:
     plugin: nil
-    build-attributes:
-      - no-system-libraries
     build-packages:
       - dpkg
       - wget
@@ -114,8 +110,6 @@ parts:
 
   wine-runtime:
     plugin: nil
-    build-attributes:
-      - no-system-libraries
     stage-packages:
       - libasound2
       #- libgphoto2-6
@@ -229,8 +223,6 @@ parts:
 
   wine-platform:
     plugin: dump
-    build-attributes:
-      - no-system-libraries
     source: snap/scripts
     organize:
       'winetricks': bin/
