@@ -112,6 +112,7 @@ parts:
     plugin: nil
     stage-packages:
       - libasound2
+      - libavcodec57
       #- libgphoto2-6
       - libgstreamer-plugins-base1.0-0
       - locales-all
@@ -159,6 +160,7 @@ parts:
       - samba-libs
       - on amd64:
         - libasound2:i386
+        - libavcodec57:i386
         #- libgphoto2-6:i386
         - libgstreamer-plugins-base1.0-0:i386
         - locales-all:i386
