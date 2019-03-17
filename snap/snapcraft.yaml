@@ -65,7 +65,7 @@ parts:
       snapcraftctl build
 
       ARCH="$(dpkg --print-architecture)"
-      WINE_VER="3.0.4"
+      WINE_VER="3.0.5"
       WINE_VER_DEV="4.4"
 
       # set snap version
