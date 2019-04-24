@@ -287,3 +287,4 @@ parts:
     after: [wine-runtime]
     override-build: |
       sed -i -E 's,(^.+"library_path": ")/.*/,\1,' $SNAPCRAFT_STAGE/usr/share/vulkan/icd.d/*.json
+      wget -nvc https://gist.github.com/mmtrt/8d1a2b9eb33429feb0197ec46b0acdf4/raw/a8082e47f3a9c2a4f5acd8cf81da6ec62c00d5fc/nvidia_icd.json -P $SNAPCRAFT_STAGE/usr/share/vulkan/icd.d
