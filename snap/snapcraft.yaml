@@ -14,7 +14,6 @@ base: core18
 
 slots:
   wine-base-stable:
-    content: wine-base-stable
     interface: content
     source:
       read:
@@ -25,7 +24,6 @@ slots:
       - $SNAP/opt/wine-stable
 
   wine-base-devel:
-    content: wine-base-devel
     interface: content
     source:
       read:
@@ -36,7 +34,6 @@ slots:
       - $SNAP/opt/wine-devel
 
   wine-base-staging:
-    content: wine-base-staging
     interface: content
     source:
       read:
