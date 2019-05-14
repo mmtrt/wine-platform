@@ -105,7 +105,7 @@ parts:
         DEBC=$(echo ${DEB} | sed 's|_| |;s|~| |' | awk '{print $2}')
         mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt/wine-stable-3
         echo "Downloading ${DEB_URL}..."
-      if [[ $DEBC == $WINE_VER_S_OLD ]]; then
+      if [ "$DEBC" = "$WINE_VER_S_OLD" ]; then
         wget --quiet "${DEB_URL}" -O "${SNAPCRAFT_PART_INSTALL}/${DEB}"
         echo "Unpacking ${DEB}..."
         dpkg -x "${SNAPCRAFT_PART_INSTALL}/${DEB}" ${SNAPCRAFT_PART_INSTALL}
