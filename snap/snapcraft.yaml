@@ -108,9 +108,9 @@ parts:
       if [ "$DEBC" = "$WINE_VER_S_OLD" ]; then
         wget --quiet "${DEB_URL}" -O "${SNAPCRAFT_PART_INSTALL}/${DEB}"
         echo "Unpacking ${DEB}..."
-        dpkg -x "${SNAPCRAFT_PART_INSTALL}/${DEB}" ${SNAPCRAFT_PART_INSTALL}
-        cp -r "${SNAPCRAFT_PART_INSTALL}/opt/wine-stable/"* "${SNAPCRAFT_PART_INSTALL}/opt/wine-stable-3"
-        rm -r "${SNAPCRAFT_PART_INSTALL}/opt/wine-stable"
+        dpkg -x "${SNAPCRAFT_PART_INSTALL}/${DEB}" ${SNAPCRAFT_PART_INSTALL}/ws
+        cp -r "${SNAPCRAFT_PART_INSTALL}/ws/opt/wine-stable/"* "${SNAPCRAFT_PART_INSTALL}/opt/wine-stable-3"
+        rm -r "${SNAPCRAFT_PART_INSTALL}/ws"
         rm -f "${SNAPCRAFT_PART_INSTALL}/${DEB}"
       else
         wget --quiet "${DEB_URL}" -O "${SNAPCRAFT_PART_INSTALL}/${DEB}"
