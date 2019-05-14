@@ -13,6 +13,16 @@ architectures:
 base: core18
 
 slots:
+  wine-base-3-stable:
+    interface: content
+    source:
+      read:
+      - $SNAP/bin
+      - $SNAP/etc
+      - $SNAP/lib
+      - $SNAP/usr
+      - $SNAP/opt/wine-stable-3
+
   wine-base-stable:
     interface: content
     source:
@@ -62,41 +72,56 @@ parts:
       snapcraftctl build
 
       ARCH="$(dpkg --print-architecture)"
-      WINE_VER="3.0.4"
+      WINE_VER_S_OLD="3.0.4"
+      WINE_VER_S="4.0"
       WINE_VER_DEV="4.6"
 
       # set snap version
-      echo "$WINE_VER-$WINE_VER_DEV" > $SNAPCRAFT_STAGE/version
+      echo "$WINE_VER_S_OLD-$WINE_VER_S-$WINE_VER_DEV" > $SNAPCRAFT_STAGE/version
 
       # wget and dpkg extract the wine debs
       ## supporting binaries which are arch-specific but the same filenames in both architectures so we only install the native architecture
-      DEB_URLS="https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-stable_${WINE_VER}~bionic_${ARCH}.deb \
+      DEB_URLS="https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-stable_${WINE_VER_S_OLD}~bionic_${ARCH}.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-stable_${WINE_VER_S}~bionic_${ARCH}.deb \
       https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-devel_${WINE_VER_DEV}~bionic_${ARCH}.deb \
       https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-staging_${WINE_VER_DEV}~bionic_${ARCH}.deb"
 
       ## wine loaders - this one is the native system architecture
-      DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-stable-${ARCH}_${WINE_VER}~bionic_${ARCH}.deb \
+      DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-stable-${ARCH}_${WINE_VER_S_OLD}~bionic_${ARCH}.deb \
+      https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-stable-${ARCH}_${WINE_VER_S}~bionic_${ARCH}.deb \
       https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-devel-${ARCH}_${WINE_VER_DEV}~bionic_${ARCH}.deb \
       https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-${ARCH}/wine-staging-${ARCH}_${WINE_VER_DEV}~bionic_${ARCH}.deb"
 
       if [ "$ARCH" = "amd64" ]; then
         ## on amd64 builds we need to also bundle the i386 wine loaders
-        DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-stable-i386_${WINE_VER}~bionic_i386.deb \
+        DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-stable-i386_${WINE_VER_S_OLD}~bionic_i386.deb \
+        https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-stable-i386_${WINE_VER_S}~bionic_i386.deb \
         https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-devel-i386_${WINE_VER_DEV}~bionic_i386.deb \
         https://dl.winehq.org/wine-builds/ubuntu/dists/bionic/main/binary-i386/wine-staging-i386_${WINE_VER_DEV}~bionic_i386.deb"
       fi
 
       for DEB_URL in ${DEB_URLS}; do
         DEB=$(basename "${DEB_URL}")
+        DEBC=$(echo ${DEB} | sed 's|_| |;s|~| |' | awk '{print $2}')
+        mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt/wine-stable-3
         echo "Downloading ${DEB_URL}..."
+      if [[ $DEBC == $WINE_VER_S_OLD ]]; then
+        wget --quiet "${DEB_URL}" -O "${SNAPCRAFT_PART_INSTALL}/${DEB}"
+        echo "Unpacking ${DEB}..."
+        dpkg -x "${SNAPCRAFT_PART_INSTALL}/${DEB}" ${SNAPCRAFT_PART_INSTALL}
+        cp -r "${SNAPCRAFT_PART_INSTALL}/opt/wine-stable/"* "${SNAPCRAFT_PART_INSTALL}/opt/wine-stable-3"
+        rm -r "${SNAPCRAFT_PART_INSTALL}/opt/wine-stable"
+        rm -f "${SNAPCRAFT_PART_INSTALL}/${DEB}"
+      else
         wget --quiet "${DEB_URL}" -O "${SNAPCRAFT_PART_INSTALL}/${DEB}"
         echo "Unpacking ${DEB}..."
         dpkg -x "${SNAPCRAFT_PART_INSTALL}/${DEB}" ${SNAPCRAFT_PART_INSTALL}
         rm -f "${SNAPCRAFT_PART_INSTALL}/${DEB}"
+      fi
       done
 
       # Cleanup
-      for REL in wine-stable wine-devel wine-staging; do
+      for REL in wine-stable-3 wine-stable wine-devel wine-staging; do
       rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/share/applications
       rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/share/man
       done
