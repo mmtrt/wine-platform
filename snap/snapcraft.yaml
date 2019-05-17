@@ -73,7 +73,7 @@ parts:
 
       ARCH="$(dpkg --print-architecture)"
       WINE_VER_S_OLD="3.0.4"
-      WINE_VER_S="4.0"
+      WINE_VER_S="4.0.1"
       WINE_VER_DEV="4.6"
 
       # set snap version
