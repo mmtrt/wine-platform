@@ -48,18 +48,14 @@ parts:
       craftctl set version="$WINE_VER-$WINE_VER_DEV"
 
       # wget and dpkg extract the wine debs
-      (mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt ; cd ${SNAPCRAFT_PART_INSTALL}/opt ; wget -q "https://github.com/mmtrt/Wine-Builds/releases/download/stable/wine-${WINE_VER}-amd64.tar.xz" ; tar -xf *.tar.xz ; rm *.tar.xz ; mv wine-10* wine-stable)
+      (mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt ; cd ${SNAPCRAFT_PART_INSTALL}/opt ; wget -q "https://github.com/mmtrt/Wine-Builds/releases/download/stable/wine-${WINE_VER}-amd64.tar.xz" ; tar -xf *.tar.xz ; rm *.tar.xz ; mv wine-11* wine-stable)
       (mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt ; cd ${SNAPCRAFT_PART_INSTALL}/opt ; wget -q "https://github.com/mmtrt/Wine-Builds/releases/download/latest/wine-${WINE_VER_DEV}-amd64.tar.xz" ; tar -xf *.tar.xz ; rm *.tar.xz ; mv wine-11* wine-devel)
       (mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt ; cd ${SNAPCRAFT_PART_INSTALL}/opt ; wget -q "https://github.com/mmtrt/Wine-Builds/releases/download/latest/wine-${WINE_VER_DEV}-staging-amd64.tar.xz" ; tar -xf *.tar.xz ; rm *.tar.xz ; mv wine-*-staging-amd64 wine-staging)
 
       # Cleanup
       for REL in wine-stable wine-devel wine-staging; do
-      rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/include
       rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/share/applications
       rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/share/man
-      rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/lib/wine/i386-windows/*.a
-      rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/lib/wine/x86_64-unix/*.a
-      rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/lib/wine/x86_64-windows/*.a
       # Disable winemenubuilder
       sed -i 's/winemenubuilder.exe -a -r/winemenubuilder.exe -r/g' "${CRAFT_PART_INSTALL}"/opt/${REL}/share/wine/wine.inf
       done
