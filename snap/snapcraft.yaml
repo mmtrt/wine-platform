@@ -1,285 +1,63 @@
 name: wine-platform
-version: latest
-version-script: cat $SNAPCRAFT_STAGE/version
+adopt-info: wine
 summary: wine platform snap it provides WINE for snaps
 description: |
  This snap creates a WINE base via content sharing to be used by other snaps that are using WINE.
 
 grade: stable
 confinement: strict
-architectures:
-  - build-on: amd64
-  - build-on: i386
+platforms:
+  amd64:
+    build-on: amd64
+    build-for: amd64
+base: core24
+compression: lzo
 
 slots:
   wine-base-stable:
-    content: wine-base-stable
     interface: content
     source:
       read:
-      - $SNAP/bin
-      - $SNAP/etc
-      - $SNAP/lib
-      - $SNAP/usr
       - $SNAP/opt/wine-stable
 
   wine-base-devel:
-    content: wine-base-devel
     interface: content
     source:
       read:
-      - $SNAP/bin
-      - $SNAP/etc
-      - $SNAP/lib
-      - $SNAP/usr
       - $SNAP/opt/wine-devel
 
   wine-base-staging:
-    content: wine-base-staging
     interface: content
     source:
       read:
-      - $SNAP/bin
-      - $SNAP/etc
-      - $SNAP/lib
-      - $SNAP/usr
       - $SNAP/opt/wine-staging
 
 parts:
-  enable-i386:
-    plugin: nil
-    build-attributes:
-      - no-system-libraries
-    override-build: |
-      snapcraftctl build
-      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "x86_64-linux-gnu" ]; then
-        dpkg --add-architecture i386
-        apt update
-      fi
-
   wine:
     plugin: nil
-    build-attributes:
-      - no-system-libraries
     build-packages:
-      - dpkg
       - wget
     override-build: |
-      snapcraftctl build
+      craftctl default
 
       ARCH="$(dpkg --print-architecture)"
-      WINE_VER="3.0.4"
-      WINE_VER_DEV="4.2"
+      WINE_VER="$(wget -qO- https://github.com/mmtrt/Wine-Builds/releases/expanded_assets/stable | grep -Eo '/wine-[0-9].*xz"' | cut -d'-' -f2 | head -1)"
+      WINE_VER_DEV="$(wget -qO- https://github.com/mmtrt/Wine-Builds/releases/expanded_assets/latest | grep -Eo '[0-9].*xz"' | sed -r 's|-amd64| |' | head -1 | awk '{print $1}')"
 
       # set snap version
-      echo "$WINE_VER-$WINE_VER_DEV" > $SNAPCRAFT_STAGE/version
+      craftctl set version="$WINE_VER-$WINE_VER_DEV"
 
       # wget and dpkg extract the wine debs
-      ## supporting binaries which are arch-specific but the same filenames in both architectures so we only install the native architecture
-      DEB_URLS="https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-stable_${WINE_VER}~xenial_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-devel_${WINE_VER_DEV}~xenial_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-staging_${WINE_VER_DEV}~xenial_${ARCH}.deb"
-
-      ## wine loaders - this one is the native system architecture
-      DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-stable-${ARCH}_${WINE_VER}~xenial_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-devel-${ARCH}_${WINE_VER_DEV}~xenial_${ARCH}.deb \
-      https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-${ARCH}/wine-staging-${ARCH}_${WINE_VER_DEV}~xenial_${ARCH}.deb"
-
-      if [ "$ARCH" = "amd64" ]; then
-        ## on amd64 builds we need to also bundle the i386 wine loaders
-        DEB_URLS="$DEB_URLS https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-i386/wine-stable-i386_${WINE_VER}~xenial_i386.deb \
-        https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-i386/wine-devel-i386_${WINE_VER_DEV}~xenial_i386.deb \
-        https://dl.winehq.org/wine-builds/ubuntu/dists/xenial/main/binary-i386/wine-staging-i386_${WINE_VER_DEV}~xenial_i386.deb"
-      fi
-
-      for DEB_URL in ${DEB_URLS}; do
-        DEB=$(basename "${DEB_URL}")
-        echo "Downloading ${DEB_URL}..."
-        wget --quiet "${DEB_URL}" -O "${SNAPCRAFT_PART_INSTALL}/${DEB}"
-        echo "Unpacking ${DEB}..."
-        dpkg -x "${SNAPCRAFT_PART_INSTALL}/${DEB}" ${SNAPCRAFT_PART_INSTALL}
-        rm -f "${SNAPCRAFT_PART_INSTALL}/${DEB}"
-      done
+      (mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt ; cd ${SNAPCRAFT_PART_INSTALL}/opt ; wget -q "https://github.com/mmtrt/Wine-Builds/releases/download/stable/wine-${WINE_VER}-amd64.tar.xz" ; tar -xf *.tar.xz ; rm *.tar.xz ; mv wine-11* wine-stable)
+      (mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt ; cd ${SNAPCRAFT_PART_INSTALL}/opt ; wget -q "https://github.com/mmtrt/Wine-Builds/releases/download/latest/wine-${WINE_VER_DEV}-amd64.tar.xz" ; tar -xf *.tar.xz ; rm *.tar.xz ; mv wine-11* wine-devel)
+      (mkdir -p ${SNAPCRAFT_PART_INSTALL}/opt ; cd ${SNAPCRAFT_PART_INSTALL}/opt ; wget -q "https://github.com/mmtrt/Wine-Builds/releases/download/latest/wine-${WINE_VER_DEV}-staging-amd64.tar.xz" ; tar -xf *.tar.xz ; rm *.tar.xz ; mv wine-*-staging-amd64 wine-staging)
 
       # Cleanup
       for REL in wine-stable wine-devel wine-staging; do
       rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/share/applications
       rm -rf ${SNAPCRAFT_PART_INSTALL}/opt/${REL}/share/man
+      # Disable winemenubuilder
+      sed -i 's/winemenubuilder.exe -a -r/winemenubuilder.exe -r/g' "${CRAFT_PART_INSTALL}"/opt/${REL}/share/wine/wine.inf
       done
       rm -rf ${SNAPCRAFT_PART_INSTALL}/usr/share/doc
       rm -rf ${SNAPCRAFT_PART_INSTALL}/usr/share/lintian
-    after:
-      - enable-i386
-
-  wine-runtime:
-    plugin: nil
-    build-attributes:
-      - no-system-libraries
-    stage-packages:
-      - libasound2
-      #- libgphoto2-6
-      - libgstreamer-plugins-base1.0-0
-      - locales-all
-      - liblcms2-2
-      - libldap-2.4-2
-      - libmpg123-0
-      - libncurses5
-      - libopenal1
-      - libpcap0.8
-      - libpulse0
-      - libudev1
-      - libxext6
-      - libxml2
-      - zlib1g
-      #- libcapi20-3
-      #- libcups2
-      - libcanberra-gtk-module
-      - libdbus-1-3
-      - libfontconfig1
-      - libfreetype6
-      - libglu1-mesa
-      - libgnutls30
-      - libgsm1
-      - libgssapi-krb5-2
-      - libjpeg8
-      #- libodbc1
-      - libosmesa6
-      - libpng12-0
-      #- libsane
-      - libsdl2-2.0-0
-      - libtiff5
-      - libv4l-0
-      - libvulkan1
-      - libxcomposite1
-      - libxcursor1
-      - libxfixes3
-      - libxi6
-      - libxinerama1
-      - libxrandr2
-      - libxrender1
-      - libxslt1.1
-      - libxxf86vm1
-      - util-linux
-      - winbind
-      - samba-libs
-      - on amd64:
-        - libasound2:i386
-        #- libgphoto2-6:i386
-        - libgstreamer-plugins-base1.0-0:i386
-        - locales-all:i386
-        - liblcms2-2:i386
-        - libldap-2.4-2:i386
-        - libmpg123-0:i386
-        - libncurses5:i386
-        - libopenal1:i386
-        - libpcap0.8:i386
-        - libpulse0:i386
-        - libudev1:i386
-        - libxext6:i386
-        - libxml2:i386
-        - zlib1g:i386
-        #- libcapi20-3:i386
-        #- libcups2:i386
-        - libcanberra-gtk-module:i386
-        - libdbus-1-3:i386
-        - libfontconfig1:i386
-        - libfreetype6:i386
-        - libglu1-mesa:i386
-        - libgnutls30:i386
-        - libgsm1:i386
-        - libgssapi-krb5-2:i386
-        - libjpeg8:i386
-        #- libodbc1:i386
-        - libosmesa6:i386
-        - libpng12-0:i386
-        #- libsane:i386
-        - libsdl2-2.0-0:i386
-        - libtiff5:i386
-        - libv4l-0:i386
-        - libvulkan1:i386
-        - libxcomposite1:i386
-        - libxcursor1:i386
-        - libxfixes3:i386
-        - libxi6:i386
-        - libxinerama1:i386
-        - libxrandr2:i386
-        - libxrender1:i386
-        - libxslt1.1:i386
-        - libxxf86vm1:i386
-        - winbind:i386
-        - samba-libs:i386
-    override-build: |
-      snapcraftctl build
-      rm -rf $SNAPCRAFT_PART_INSTALL/etc/init
-      rm -rf $SNAPCRAFT_PART_INSTALL/etc/init.d
-      rm -rf $SNAPCRAFT_PART_INSTALL/etc/logrotate.d
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/apps
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/applications
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/bug
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/doc
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/doc-base
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/debhelper
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/lintian
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/man
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/pixmaps
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/pkgconfig
-      rm $SNAPCRAFT_PART_INSTALL/usr/bin/update-mime-database.real
-    after:
-      - enable-i386
-
-  wine-platform:
-    plugin: dump
-    build-attributes:
-      - no-system-libraries
-    source: snap/scripts
-    organize:
-      'winetricks': bin/
-      'zenity': bin/
-      'wpfile': bin/
-    stage-packages:
-      - cabextract         # winetricks
-      - libgdk-pixbuf2.0-0 # yad
-      - libgtk-3-0         # yad
-      - libnotify4         # yad
-      - libnotify-bin      # sommelier
-      - perl-base          # winetricks
-      - shared-mime-info
-      - unzip              # winetricks
-      - wget               # winetricks
-      - x11-xserver-utils  # sommelier
-      - yad                # winetricks
-    override-build: |
-      snapcraftctl build
-      wget --quiet "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" -O $SNAPCRAFT_PART_INSTALL/winetricks
-      chmod +x $SNAPCRAFT_PART_INSTALL/winetricks
-      touch $SNAPCRAFT_PART_INSTALL/wpfile
-      rm -rf $SNAPCRAFT_PART_INSTALL/etc/init
-      rm -rf $SNAPCRAFT_PART_INSTALL/etc/init.d
-      rm -rf $SNAPCRAFT_PART_INSTALL/etc/logrotate.d
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/bin/fc-*
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/bin/gtk-*
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/dconf/dconf-service
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/glib-networking/glib-pacrunner
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/GConf
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/aclocal
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/apport
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/apps
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/bash-completion
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/bug
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/debhelper
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/doc
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/doc-base
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/icons/Adwaita
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/icons/Humanity*
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/icons/LoginIcons
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/icons/ubuntu-mono*
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/info
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/kde4
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/lintian
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/menu
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/man
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/perl5
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/pixmaps
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/share/pkgconfig
-    after:
-      - enable-i386
